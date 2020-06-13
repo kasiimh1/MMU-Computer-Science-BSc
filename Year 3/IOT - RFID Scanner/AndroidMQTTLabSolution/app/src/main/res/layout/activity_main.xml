@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout2"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/publishDoorUnlockBtn"
+        android:layout_width="250dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="250dp"
+        android:text="Unlock Door"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="276dp"
+        android:layout_height="59dp"
+        android:layout_marginStart="68dp"
+        android:layout_marginTop="128dp"
+        android:fontFamily="monospace"
+        android:text="door automatically locks after 3 seconds"
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="276dp"
+        android:layout_height="99dp"
+        android:layout_marginStart="68dp"
+        android:layout_marginTop="28dp"
+        android:fontFamily="monospace"
+        android:text="Press Unlock Door to Unlock the door if you're an authenticated user "
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</android.support.constraint.ConstraintLayout>
+

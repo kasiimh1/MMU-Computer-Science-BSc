@@ -1,0 +1,364 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>myknn</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-01-08"><meta name="DC.source" content="myknn.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">classdef</span> myknn
+
+<span class="comment">% This class aims to find the K nearest neighbours from our provided data,</span>
+<span class="comment">% where we fit all the data into a standardized range by setting a z-score (as small K could overfit training data),</span>
+<span class="comment">% classify the data (to the nearest neighbours &amp; this is slower the more testing examples they're) 'classify is K * training examples' and predict the value for each example one by one iterating over the data,</span>
+<span class="comment">% now we calculate the distance between each specific example and sort them closest to our K value ... continued next line</span>
+<span class="comment">% (similarity can be measured here.. between examples plotted in the feature space),</span>
+<span class="comment">% then we return our prediction which is based off the mode of nearest neighbours to K or K-NN</span>
+<span class="comment">% You want the value of K to be a small as possible (but this could also overfit the training data).</span>
+
+    <span class="keyword">methods</span>(Static)
+
+        <span class="comment">% create a new function that allows us to train K-NN classifier from the provided data by only passing a hyper parameter (K)</span>
+        <span class="keyword">function</span> m = fit(train_examples, train_labels, k)
+
+        <span class="comment">% start of standardisation process</span>
+
+        <span class="comment">%in this process we formulate a standard range for all the data that was inputted for our fit method</span>
+
+            <span class="comment">%we now find the average (mean) for all the inputted data stored in our array by iterating shorthand over it and store the result</span>
+            m.mean = mean(train_examples{:,:});
+            <span class="comment">%we now find the standard deviation for all the inputted data stored in our array by iterating shorthand over it, We store the result</span>
+			m.std = std(train_examples{:,:});
+
+            <span class="comment">%create a new for loop where we can iterate over the training data and take away the averages</span>
+            <span class="comment">% and then divide by the standard range we worked out in the step above</span>
+            <span class="keyword">for</span> i=1:size(train_examples,1)
+                <span class="comment">%take the current value and minus the average that we worked out above and store the result</span>
+				train_examples{i,:} = train_examples{i,:} - m.mean;
+                <span class="comment">%take the current value and divide the average that we worked out above and store the result</span>
+                train_examples{i,:} = train_examples{i,:} ./ m.std;
+            <span class="keyword">end</span>
+        <span class="comment">% end of standardisation process</span>
+
+            <span class="comment">%store the class example values in our model so we can access them later</span>
+            m.train_examples = train_examples;
+            <span class="comment">%store the class label values in our model so we can access them later</span>
+            m.train_labels = train_labels;
+            <span class="comment">%store our value of K or the value which we will compare the nearest neighbours with</span>
+            m.k = k;
+        <span class="keyword">end</span>
+
+        <span class="comment">% create a new function that allows us to classify our testing data</span>
+        <span class="keyword">function</span> predictions = predict(m, test_examples)
+
+            <span class="comment">%set up the value to be categorically stored</span>
+            predictions = categorical;
+
+            <span class="comment">%create a new for loop where we can iterate over all of the testing examples</span>
+            <span class="keyword">for</span> i=1:size(test_examples,1)
+
+                <span class="comment">%print the message below with the current value (item) we are currently on out of the size of the testing dataset e.g. current value is 2/50</span>
+                fprintf(<span class="string">'classifying example example %i/%i\n'</span>, i, size(test_examples,1));
+
+                <span class="comment">%take a value from our testing examples and store it</span>
+                this_test_example = test_examples{i,:};
+
+                <span class="comment">% start of standardisation process</span>
+
+                <span class="comment">%in this process we formulate a standard range for all the data that was inputted for our fit method</span>
+
+                <span class="comment">%take the value of our testing data and minus the average that we worked out in our fit function and store the result</span>
+                this_test_example = this_test_example - m.mean;
+                <span class="comment">%take the value of our testing data and divide the average that we worked out in our fit function and store the result</span>
+                this_test_example = this_test_example ./ m.std;
+                <span class="comment">% end of standardisation process</span>
+
+                <span class="comment">%store a new value which holds the calculated predicted value for this one example</span>
+                this_prediction = myknn.predict_one(m, this_test_example);
+                <span class="comment">%taking the predicted example above we then add our newly calculated prediciton to be stored on the end</span>
+                predictions(end+1) = this_prediction;
+            <span class="keyword">end</span>
+
+		<span class="keyword">end</span>
+
+        <span class="comment">%create a new fuction that allows us to predict only one example</span>
+        <span class="keyword">function</span> prediction = predict_one(m, this_test_example)
+
+            <span class="comment">%store a new value which holds the calculated distances values for one example</span>
+            distances = myknn.calculate_distances(m, this_test_example);
+            <span class="comment">%store the value of the K nearest for this example</span>
+            neighbour_indices = myknn.find_nn_indices(m, distances);
+            <span class="comment">%store a new value which holds the calculated prediction value for one example</span>
+            prediction = myknn.make_prediction(m, neighbour_indices);
+
+        <span class="keyword">end</span>
+
+        <span class="comment">%create a new function that loops through all the stored training examples in our model</span>
+        <span class="comment">% and calculates the straight line distance between two points for all the training examples to our one example</span>
+        <span class="keyword">function</span> distances = calculate_distances(m, this_test_example)
+            <span class="comment">%store our calcluated distances for this example</span>
+			distances = [];
+
+            <span class="comment">%create a new for loop where we can iterate over all of the training examples</span>
+			<span class="keyword">for</span> i=1:size(m.train_examples,1)
+                <span class="comment">%store the value for this example from this row and column</span>
+                this_training_example = m.train_examples{i,:};
+                <span class="comment">%store the calculated distance between this train example and the test example</span>
+                this_distance = myknn.calculate_distance(this_training_example, this_test_example);
+                <span class="comment">%taking the distance example above we then add our newly calculated distance to be stored on the end</span>
+                distances(end+1) = this_distance;
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="comment">% create a new function that allows us to find the calculated distance between two points</span>
+        <span class="keyword">function</span> distance = calculate_distance(p, q)
+
+            <span class="comment">%store the value of the difference between the two points</span>
+            <span class="comment">% so we can use that value below</span>
+            differences = q - p;
+
+            <span class="comment">%store the value of the diffrence between the two points</span>
+            <span class="comment">% to the power of 2, this converts all values to become postive so we can indentify all the diffrences</span>
+            <span class="comment">% within a more precise range as some values could return 0 or less</span>
+            squares = differences .^ 2;
+
+            <span class="comment">%calculate the total of all the values held in this example</span>
+            total = sum(squares);
+
+            <span class="comment">%store the total disantance of the example provided by finding the square root</span>
+            distance = sqrt(total);
+		<span class="keyword">end</span>
+
+        <span class="comment">%create a new function that stores the indices of the k nearest neighbours from the provided example in a sorted format</span>
+        <span class="keyword">function</span> neighbour_indices = find_nn_indices(m, distances)
+            <span class="comment">% store the value of the sorted distances in this example in a sorted list from values that we worked out in our function distance above</span>
+            [sorted, indices] = sort(distances);
+            <span class="comment">% store the first K value of the sorted list from above</span>
+            neighbour_indices = indices(1:m.k);
+
+		<span class="keyword">end</span>
+
+        <span class="comment">%create a new function that makes a prediction based on the values from our model calculating the most common value and store them</span>
+        <span class="keyword">function</span> prediction = make_prediction(m, neighbour_indices)
+            <span class="comment">%store the labels for the values which are closest to our k example</span>
+            neighbour_labels = m.train_labels(neighbour_indices);
+            <span class="comment">%store the most common value for this example (or mode value)</span>
+            prediction = mode(neighbour_labels);
+		<span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans = 
+
+  myknn with no properties.
+
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+classdef myknn
+
+% This class aims to find the K nearest neighbours from our provided data, 
+% where we fit all the data into a standardized range by setting a z-score (as small K could overfit training data), 
+% classify the data (to the nearest neighbours & this is slower the more testing examples they're) 'classify is K * training examples' and predict the value for each example one by one iterating over the data, 
+% now we calculate the distance between each specific example and sort them closest to our K value ... continued next line
+% (similarity can be measured here.. between examples plotted in the feature space), 
+% then we return our prediction which is based off the mode of nearest neighbours to K or K-NN 
+% You want the value of K to be a small as possible (but this could also overfit the training data).
+
+    methods(Static)
+        
+        % create a new function that allows us to train K-NN classifier from the provided data by only passing a hyper parameter (K)       
+        function m = fit(train_examples, train_labels, k)
+          
+        % start of standardisation process 
+
+        %in this process we formulate a standard range for all the data that was inputted for our fit method 
+        
+            %we now find the average (mean) for all the inputted data stored in our array by iterating shorthand over it and store the result
+            m.mean = mean(train_examples{:,:});
+            %we now find the standard deviation for all the inputted data stored in our array by iterating shorthand over it, We store the result
+			m.std = std(train_examples{:,:}); 
+            
+            %create a new for loop where we can iterate over the training data and take away the averages 
+            % and then divide by the standard range we worked out in the step above
+            for i=1:size(train_examples,1)
+                %take the current value and minus the average that we worked out above and store the result
+				train_examples{i,:} = train_examples{i,:} - m.mean;
+                %take the current value and divide the average that we worked out above and store the result
+                train_examples{i,:} = train_examples{i,:} ./ m.std;
+            end
+        % end of standardisation process
+            
+            %store the class example values in our model so we can access them later 
+            m.train_examples = train_examples;
+            %store the class label values in our model so we can access them later 
+            m.train_labels = train_labels;
+            %store our value of K or the value which we will compare the nearest neighbours with 
+            m.k = k;        
+        end
+        
+        % create a new function that allows us to classify our testing data        
+        function predictions = predict(m, test_examples)
+
+            %set up the value to be categorically stored
+            predictions = categorical;
+
+            %create a new for loop where we can iterate over all of the testing examples     
+            for i=1:size(test_examples,1)
+                
+                %print the message below with the current value (item) we are currently on out of the size of the testing dataset e.g. current value is 2/50
+                fprintf('classifying example example %i/%i\n', i, size(test_examples,1));
+                
+                %take a value from our testing examples and store it 
+                this_test_example = test_examples{i,:};
+                
+                % start of standardisation process
+
+                %in this process we formulate a standard range for all the data that was inputted for our fit method 
+
+                %take the value of our testing data and minus the average that we worked out in our fit function and store the result
+                this_test_example = this_test_example - m.mean;
+                %take the value of our testing data and divide the average that we worked out in our fit function and store the result
+                this_test_example = this_test_example ./ m.std;
+                % end of standardisation process
+                
+                %store a new value which holds the calculated predicted value for this one example
+                this_prediction = myknn.predict_one(m, this_test_example);
+                %taking the predicted example above we then add our newly calculated prediciton to be stored on the end
+                predictions(end+1) = this_prediction;            
+            end
+        
+		end
+
+        %create a new fuction that allows us to predict only one example 
+        function prediction = predict_one(m, this_test_example)
+            
+            %store a new value which holds the calculated distances values for one example
+            distances = myknn.calculate_distances(m, this_test_example);
+            %store the value of the K nearest for this example 
+            neighbour_indices = myknn.find_nn_indices(m, distances);
+            %store a new value which holds the calculated prediction value for one example
+            prediction = myknn.make_prediction(m, neighbour_indices);
+        
+        end
+
+        %create a new function that loops through all the stored training examples in our model
+        % and calculates the straight line distance between two points for all the training examples to our one example
+        function distances = calculate_distances(m, this_test_example)
+            %store our calcluated distances for this example
+			distances = [];
+            
+            %create a new for loop where we can iterate over all of the training examples  
+			for i=1:size(m.train_examples,1)
+                %store the value for this example from this row and column
+                this_training_example = m.train_examples{i,:};
+                %store the calculated distance between this train example and the test example
+                this_distance = myknn.calculate_distance(this_training_example, this_test_example);
+                %taking the distance example above we then add our newly calculated distance to be stored on the end
+                distances(end+1) = this_distance;
+            end
+        
+        end
+        
+        % create a new function that allows us to find the calculated distance between two points 
+        function distance = calculate_distance(p, q)       
+
+            %store the value of the difference between the two points
+            % so we can use that value below
+            differences = q - p;
+
+            %store the value of the diffrence between the two points
+            % to the power of 2, this converts all values to become postive so we can indentify all the diffrences
+            % within a more precise range as some values could return 0 or less 
+            squares = differences .^ 2;
+
+            %calculate the total of all the values held in this example
+            total = sum(squares);
+
+            %store the total disantance of the example provided by finding the square root
+            distance = sqrt(total);        
+		end
+
+        %create a new function that stores the indices of the k nearest neighbours from the provided example in a sorted format
+        function neighbour_indices = find_nn_indices(m, distances)
+            % store the value of the sorted distances in this example in a sorted list from values that we worked out in our function distance above
+            [sorted, indices] = sort(distances);
+            % store the first K value of the sorted list from above 
+            neighbour_indices = indices(1:m.k);
+        
+		end
+        
+        %create a new function that makes a prediction based on the values from our model calculating the most common value and store them
+        function prediction = make_prediction(m, neighbour_indices)
+            %store the labels for the values which are closest to our k example 
+            neighbour_labels = m.train_labels(neighbour_indices);
+            %store the most common value for this example (or mode value)
+            prediction = mode(neighbour_labels);        
+		end
+
+    end
+end
+
+##### SOURCE END #####
+--></body></html>

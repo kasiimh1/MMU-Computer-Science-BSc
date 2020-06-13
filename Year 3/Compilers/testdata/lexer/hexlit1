@@ -1,0 +1,18 @@
+class Program {
+  int myfunc(int x, int y) {
+    int x;
+    int x;
+    x = 1;
+    return x;
+  }
+
+  int main() {
+    x = myfunc();
+    return x;
+  }
+}
+
+//your semantic checker should produce the following errors:
+//error on line 3 : ID( x ) redeclared in same scope
+//error on line 4 : ID( x ) redeclared in same scope
+//error on line 11 : ID( x ) not declared before use

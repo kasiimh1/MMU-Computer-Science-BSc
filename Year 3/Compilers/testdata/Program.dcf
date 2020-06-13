@@ -1,0 +1,34 @@
+class Program {
+    boolean s;
+    boolean t;
+
+    void bar(int b) {     
+        int o;
+        int a;
+        o = a; 
+        return false;
+    }
+
+    boolean bar(int a) {
+        int r;
+        r = a * 9;
+        j = a * 2;
+        break;
+    }
+
+    int test(int p){
+        if (t == p) {}	// condition should be a boolean
+        if (! s || ! e) {
+           for x = 2, true {   
+            break;
+            } 
+        }	
+    }
+
+    int main(int b) {    
+        boolean d;    
+        boolean b;
+        a[1] = foo(1);
+        b = x * d;
+    }
+}

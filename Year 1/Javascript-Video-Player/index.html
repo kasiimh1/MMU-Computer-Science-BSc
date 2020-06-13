@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Part B Video</title>
+  <link rel="shortcut icon" href="./images/ico.ico">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+  <!-- media player buttons from fontawesome linked via an external CSS -->
+  <link rel="stylesheet" href="./css/style.css" type="text/css">
+  <script src="./js/videoScript.js"></script>
+</head>
+
+<body>
+  <main>
+
+    <video id="myVideo" poster="./images/GOT.S7.png" title="Game of Thrones Season 7 Trailer"> <!-- default image to load upon page load, before the video is started -->
+
+        <source src="video/GOT.S7.x264.mp4">
+        <source src="video/GOT.S7.VP8.webm">
+        <source src="video/GOT.S7.VP9.webm">
+
+    </video>
+
+
+    <div id="videoControls" title="Video Controls Bar">
+      <button type="button" title="Play & Pause Button" id="playPause">&#xf04b;</button>
+      <button type="button" title="Mute Volume Button" id="volumeMute">&#xf028;</button>
+      <input type="range" title="Volume Slider" id="volumeSlider" min="0" max="100" value="50" step="10">
+      <button type="button" title="Restart Video Button" id="restartVideo">&#xf0e2;</button>
+      <button type="button" title="Loop Video Button" id="loopVideo">&#xf204;</button>
+      <button type="button" title="Stop Video Button" id="stopVideo">&#xf04d;</button>
+      <button type="button" title="Fast Forward Button" id="fastForwardVideo">&#xf04e;</button>
+      <p id="current"><input type="range" min="0" max="100" value="0" step="1" title="Video Scrubber" id="seekBar"><span id="currentTime" title="Video Current Time">0:00</span> / <span id="durationTime" title="Video Duration Time">0</span></p>
+
+      <select id="selectedPlaybackValue" title="Video Playback Speed Options">
+            <option title="Playback Speed 0.25" value="0.25">0.25</option>
+            <option title="Playback Speed 0.50" value="0.50">0.50</option>
+            <option title="Playback Speed 0.75" value="0.75">0.75</option>
+            <option title="Playback Speed 1.00" value="1.00" selected>Default</option> <!-- selected allows for a default speed to be selected on page load -->
+            <option title="Playback Speed 1.25" value="1.25">1.25</option>
+            <option title="Playback Speed 1.50" value="1.50">1.50</option>
+            <option title="Playback Speed 2.00" value="2.00">2.00</option>
+        </select>
+
+      <button type="button" title="Fullscreen Button" id="videoFullscreen">&#xf065;</button>
+
+
+    </div>
+  </main>
+
+</body>
+
+</html>

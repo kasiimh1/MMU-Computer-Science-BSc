@@ -1,0 +1,346 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mynb</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-01-08"><meta name="DC.source" content="mynb.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">classdef</span> mynb
+
+    <span class="comment">% This class aims to find the Naive Bayes from our provided data,</span>
+    <span class="comment">% where we fit all the data into a standardized range (normal distribution, no z-score needed here),</span>
+    <span class="comment">% classify the data (never slow) and predict the value for each example one by one iterating over the data,</span>
+    <span class="comment">% then we return our prediction which is based off the approximate true posterior probabilities for each class</span>
+    <span class="comment">% calculate the likelihood which gives us a probability that a random class will belong to the example</span>
+
+    <span class="keyword">methods</span>(Static)
+
+        <span class="comment">%train our own Naive Bayes model:</span>
+        <span class="keyword">function</span> m = fit(train_examples, train_labels)
+
+        <span class="comment">%start of standardisation process</span>
+
+            <span class="comment">%store the diffrent train labels in our model example</span>
+            m.unique_classes = unique(train_labels);
+            <span class="comment">%store the value of the total amount of classes in our model example</span>
+            m.n_classes = length(m.unique_classes);
+
+            <span class="comment">%store the average in this model example</span>
+            m.means = {};
+            <span class="comment">%store the standard diviation in this model example</span>
+            m.stds = {};
+
+            <span class="comment">%Inside each iteration of the loop, it pulls out all of the training examples which belong to the current class**</span>
+            <span class="keyword">for</span> i = 1:m.n_classes
+                <span class="comment">% set up the this_class variable as an example</span>
+                this_class = m.unique_classes(i);
+                <span class="comment">%find all the examples from this same class</span>
+                examples_from_this_class = train_examples{train_labels==this_class,:};
+                <span class="comment">%taking the caluclated mean value for each feature **</span>
+                m.means{end+1} = mean(examples_from_this_class);
+                <span class="comment">%taking the caluclated standard deviation for each feature **</span>
+                m.stds{end+1} = std(examples_from_this_class);
+
+            <span class="keyword">end</span>
+            <span class="comment">% end of standardisation process</span>
+
+            <span class="comment">%store the prior value for current class **</span>
+            m.priors = [];
+
+            <span class="comment">%Inside each iteration of the loop, it pulls out all of the training examples which belong to the current class**</span>
+            <span class="keyword">for</span> i = 1:m.n_classes
+                <span class="comment">% set up the this_class variable as an example</span>
+                this_class = m.unique_classes(i);
+                <span class="comment">% find all the examples from this same class</span>
+                examples_from_this_class = train_examples{train_labels==this_class,:};
+                <span class="comment">% calculate the proir probality for this instance by dividing the total</span>
+                <span class="comment">% number of training examples by the how many times the class occurs</span>
+                m.priors(end+1) = size(examples_from_this_class,1) / size(train_labels,1);
+
+			<span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="comment">% create a new function that allows us to classify our testing data</span>
+        <span class="keyword">function</span> predictions = predict(m, test_examples)
+
+            <span class="comment">%set up the value to be categorically stored</span>
+            predictions = categorical;
+
+            <span class="comment">%create a new for loop where we can iterate over the testing examples **</span>
+            <span class="keyword">for</span> i=1:size(test_examples,1)
+
+                <span class="comment">%print the message below with the current value (item) we are currently on out of the size of the testing dataset e.g. current value is 2/50</span>
+                fprintf(<span class="string">'classifying example %i/%i\n'</span>, i, size(test_examples,1));
+                <span class="comment">%take a value from our testing examples and store it</span>
+                this_test_example = test_examples{i,:};
+                <span class="comment">%store a new value which holds the calculated predicted value for this one example/ predict a class label for this new example...</span>
+                this_prediction = mynb.predict_one(m, this_test_example);
+                <span class="comment">%add our newly calculated prediciton to be stored on the end **</span>
+                predictions(end+1) = this_prediction;
+
+			<span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">%create a new fuction that allows us to predict only one example</span>
+        <span class="keyword">function</span> prediction = predict_one(m, this_test_example)
+
+            <span class="comment">%Inside each iteration of the loop, it pulls out all of the training examples which belong to the current class**</span>
+            <span class="keyword">for</span> i=1:m.n_classes
+                <span class="comment">%store a new value which holds the calculated likelihood value for one example</span>
+                this_likelihood = mynb.calculate_likelihood(m, this_test_example, i);
+                <span class="comment">%store a new value which holds the calculated prior value for one example</span>
+                this_prior = mynb.get_prior(m, i);
+                <span class="comment">%store a new value which holds the calculated posterior value for one example</span>
+                <span class="comment">%posterior_ - isn't equal to the posterior, but it is proportional to it</span>
+                posterior_(i) = this_likelihood * this_prior;
+
+            <span class="keyword">end</span>
+            <span class="comment">%what these two lines do is calculate numbers which approximate the true posterior probabilities for each class **</span>
+            <span class="comment">%store the maxium value in the list because this tells us which element of unique_classes to look in for the name of the predicted class label **</span>
+            [winning_value_, winning_index] = max(posterior_);
+            <span class="comment">%store the prediction of the maxium value in the list from above</span>
+            prediction = m.unique_classes(winning_index);
+
+        <span class="keyword">end</span>
+
+        <span class="comment">%create a function that allows us to give us a probability that a random class will belong to the example **</span>
+        <span class="keyword">function</span> likelihood = calculate_likelihood(m, this_test_example, class)
+
+            <span class="comment">%set a starting value</span>
+			likelihood = 1;
+
+            <span class="comment">%create a new for loop where we can iterate over the total number of features **</span>
+            <span class="keyword">for</span> i=1:length(this_test_example)
+                <span class="comment">%</span>
+                <span class="comment">% We are calculating the likelihood in order to multiply it by the prior and give a value that is proportional to the posterior **</span>
+                <span class="comment">%</span>
+                <span class="comment">% Class conditional independence assumption is they're independant of one another if conditioned on the same class value</span>
+                <span class="comment">% store the value of our previously set likelihood multiplied by probability density of the current class by passing in current index **</span>
+                <span class="comment">% average and standard diviation</span>
+                likelihood = likelihood * mynb.calculate_pd(this_test_example(i), m.means{class}(i), m.stds{class}(i));
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">%create a function that fetches the prior for the current class</span>
+        <span class="keyword">function</span> prior = get_prior(m, class)
+            <span class="comment">%returns the probalility from the model structure</span>
+			prior = m.priors(class);
+
+		<span class="keyword">end</span>
+
+        <span class="comment">%create a function that calaculates probability density for a normal distribution **</span>
+        <span class="keyword">function</span> pd = calculate_pd(x, mu, sigma)
+            first_bit = 1 / sqrt(2*pi*sigma^2);
+            second_bit = - ( ((x-mu)^2) / (2*sigma^2) );
+            pd = first_bit * exp(second_bit);
+
+		<span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans = 
+
+  mynb with no properties.
+
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+classdef mynb
+
+    % This class aims to find the Naive Bayes from our provided data, 
+    % where we fit all the data into a standardized range (normal distribution, no z-score needed here), 
+    % classify the data (never slow) and predict the value for each example one by one iterating over the data, 
+    % then we return our prediction which is based off the approximate true posterior probabilities for each class
+    % calculate the likelihood which gives us a probability that a random class will belong to the example
+
+    methods(Static)
+
+        %train our own Naive Bayes model:
+        function m = fit(train_examples, train_labels)
+
+        %start of standardisation process 
+
+            %store the diffrent train labels in our model example
+            m.unique_classes = unique(train_labels);
+            %store the value of the total amount of classes in our model example
+            m.n_classes = length(m.unique_classes);
+
+            %store the average in this model example
+            m.means = {};
+            %store the standard diviation in this model example
+            m.stds = {};
+
+            %Inside each iteration of the loop, it pulls out all of the training examples which belong to the current class**
+            for i = 1:m.n_classes
+                % set up the this_class variable as an example
+                this_class = m.unique_classes(i);
+                %find all the examples from this same class
+                examples_from_this_class = train_examples{train_labels==this_class,:};
+                %taking the caluclated mean value for each feature **
+                m.means{end+1} = mean(examples_from_this_class);
+                %taking the caluclated standard deviation for each feature **
+                m.stds{end+1} = std(examples_from_this_class);
+            
+            end            
+            % end of standardisation process
+
+            %store the prior value for current class **
+            m.priors = [];
+            
+            %Inside each iteration of the loop, it pulls out all of the training examples which belong to the current class**
+            for i = 1:m.n_classes
+                % set up the this_class variable as an example
+                this_class = m.unique_classes(i);
+                % find all the examples from this same class
+                examples_from_this_class = train_examples{train_labels==this_class,:};
+                % calculate the proir probality for this instance by dividing the total 
+                % number of training examples by the how many times the class occurs
+                m.priors(end+1) = size(examples_from_this_class,1) / size(train_labels,1);
+            
+			end
+
+        end
+
+        % create a new function that allows us to classify our testing data        
+        function predictions = predict(m, test_examples)
+
+            %set up the value to be categorically stored
+            predictions = categorical;
+
+            %create a new for loop where we can iterate over the testing examples **    
+            for i=1:size(test_examples,1)
+
+                %print the message below with the current value (item) we are currently on out of the size of the testing dataset e.g. current value is 2/50
+                fprintf('classifying example %i/%i\n', i, size(test_examples,1));
+                %take a value from our testing examples and store it 
+                this_test_example = test_examples{i,:};
+                %store a new value which holds the calculated predicted value for this one example/ predict a class label for this new example...
+                this_prediction = mynb.predict_one(m, this_test_example);
+                %add our newly calculated prediciton to be stored on the end **
+                predictions(end+1) = this_prediction;
+            
+			end
+        end
+
+        %create a new fuction that allows us to predict only one example 
+        function prediction = predict_one(m, this_test_example)
+
+            %Inside each iteration of the loop, it pulls out all of the training examples which belong to the current class**
+            for i=1:m.n_classes
+                %store a new value which holds the calculated likelihood value for one example
+                this_likelihood = mynb.calculate_likelihood(m, this_test_example, i);
+                %store a new value which holds the calculated prior value for one example
+                this_prior = mynb.get_prior(m, i);
+                %store a new value which holds the calculated posterior value for one example
+                %posterior_ - isn't equal to the posterior, but it is proportional to it
+                posterior_(i) = this_likelihood * this_prior;
+            
+            end
+            %what these two lines do is calculate numbers which approximate the true posterior probabilities for each class **
+            %store the maxium value in the list because this tells us which element of unique_classes to look in for the name of the predicted class label **
+            [winning_value_, winning_index] = max(posterior_);
+            %store the prediction of the maxium value in the list from above 
+            prediction = m.unique_classes(winning_index);
+
+        end
+        
+        %create a function that allows us to give us a probability that a random class will belong to the example **
+        function likelihood = calculate_likelihood(m, this_test_example, class)
+            
+            %set a starting value
+			likelihood = 1;
+            
+            %create a new for loop where we can iterate over the total number of features **
+            for i=1:length(this_test_example)
+                %
+                % We are calculating the likelihood in order to multiply it by the prior and give a value that is proportional to the posterior **
+                %
+                % Class conditional independence assumption is they're independant of one another if conditioned on the same class value
+                % store the value of our previously set likelihood multiplied by probability density of the current class by passing in current index **
+                % average and standard diviation 
+                likelihood = likelihood * mynb.calculate_pd(this_test_example(i), m.means{class}(i), m.stds{class}(i));
+            end
+        end
+        
+        %create a function that fetches the prior for the current class
+        function prior = get_prior(m, class)
+            %returns the probalility from the model structure
+			prior = m.priors(class);
+        
+		end
+        
+        %create a function that calaculates probability density for a normal distribution ** 
+        function pd = calculate_pd(x, mu, sigma)
+            first_bit = 1 / sqrt(2*pi*sigma^2);
+            second_bit = - ( ((x-mu)^2) / (2*sigma^2) );
+            pd = first_bit * exp(second_bit);
+        
+		end
+            
+    end
+end
+
+##### SOURCE END #####
+--></body></html>

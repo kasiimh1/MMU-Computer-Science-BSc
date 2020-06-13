@@ -1,0 +1,293 @@
+-------------------------------------------------------- TASK A
+
+
+.data #items stored for use later
+
+promp: .asciiz "\n Enter Your Name " #tell user to enter their name
+promp1: .asciiz "\n Enter Your Student ID " #tell user to enter ID
+name: .space 10 #reserve a set number of bytes
+message: .asciiz"\n Hello " #greeting + user's name
+message1: .asciiz" \n Your Name Is - " #print users name
+message2: .asciiz" \n Your Student ID Is - " #print users ID 
+
+.text #for instructions
+
+#promp user to enter their name
+li $v0, 4 #load the service call (print promp string to tell user to input their name)
+la $a0, promp #load address in arg0 with the contents of promp defined in .data when we run syscall
+syscall #get the system to execute the above service call
+
+#get the users name
+li $v0, 8 #load the service call (read users name string) this reads what the user just inputted for their name
+la $a0, name #load address in arg0 with the contents of name defined in .data when we run syscall
+li $a1, 11 # sets character limit that can be inputted to 10 characters for the inputted name
+syscall #get the system to execute the above service call
+
+#print message
+li $v0, 4 #load the service call (print greeting message string)
+la $a0, message #load address in arg0 with the contents of message defined in .data when we run syscall
+syscall #get the system to execute the above service call
+
+#print name
+li $v0, 4 #load the service call (print users name string)
+la $a0, name #reserve allocated bytes for printing the users name in arg0
+syscall #get the system to execute the above service call
+
+#promp user to enter their ID
+li $v0, 4 #load the service call (print promp1 to tell the user to enter their ID number)
+la $a0, promp1 #load address in arg0 with the contents of promp1 defined in .data when we run syscall
+syscall #get the system to execute the above service call
+
+#get the users ID number
+li $v0, 5 #load the service call (read int that user just inputted)
+syscall #get the system to execute the above service call
+move $t0, $v0 #moves what's in $v0 to $t0
+
+#print message
+li $v0, 4 #load the service call (print users name message string)
+la $a0, message1 #load address in arg0 with the contents of message1 defined in .data when we run syscall
+syscall #get the system to execute the above service call
+
+#print name
+li $v0, 4 #load the service call (print users name string)
+la $a0, name #load address in arg0 with the contents of name defined in .data when we run syscall
+syscall #get the system to execute the above service call
+
+#print message
+li $v0, 4 #load the service call (print users ID message string)
+la $a0, message2 #load address in arg0 with the contents of message2 defined in .data when we run syscall
+syscall #get the system to execute the above service call
+
+# print ID number
+li $v0, 1 #load the service call (print users ID as int)
+move $a0, $t0 #moves the stored int ID number to arg0 to print when we run syscall
+syscall #get the system to execute the above service call
+
+#end the program by loading the exit service code
+li $v0, 10 #load service call to terminate the program
+syscall #get the system to execute the above service call
+
+-------------------------------------------------------- TASK B  
+
+
+.data #for data
+
+promp: .asciiz "Enter the last 3 digits of your Student ID number: "
+message: .asciiz"\n Your answer is: " 
+spaceit: .asciiz "\n - "
+.text #for instructions 
+
+#promp user to enter their ID 
+li $v0, 4 
+la $a0, promp
+syscall #let system call the specified value in $v0
+
+#get the users ID number 
+li $v0, 5
+syscall #let system call the specified value in $v0
+#move the inputted number to a temp register
+move $t0, $v0
+li $v0, 4
+la $a0, message
+syscall #let system call the specified value in $v0
+
+# add 1 to the inputted number
+add $t1, $t0, 1
+# divide the number by 2
+div $t2, $t1, 2
+
+# print ID number
+li $v0, 1
+move $a0, $t2
+syscall #let system call the specified value in $v0
+
+addi $t6,$zero, 5 #set loop to 6 times 
+
+loop: #looping the printing of the number 
+addi $v0, $zero, 4  # print_string syscall
+la $a0, spaceit   # load address string that will print the number to a new line
+syscall #let system call the specified value in $v0
+
+li $v0, 1
+move $a0, $t2
+syscall #let system call the specified value in $v0
+
+addi $t6, $t6, -1 #minus one for everytime the loop is run
+
+bgez $t6, loop  #loop if the condition is met 
+
+#end the program by loading the exit service code
+li $v0, 10
+syscall #let system call the specified value in $v0
+
+-------------------------------------------------------- TASK C  
+
+.data #for data
+
+promp: .asciiz "\nEnter Your Student ID "
+message: .asciiz"\n\nYour computed value is : "
+time: .asciiz "\n \nTask completed in "
+milliseconds: .asciiz " milliseconds! "
+seconds: .asciiz " seconds! "
+txtsetup: .asciiz "\nSetup has been run! \n Getting ready to run the loops (:"
+loops: .asciiz "\n \nLoops ran - "
+.text #for instructions go here
+
+li $v0, 4
+la $a0, promp
+syscall
+
+li $v0, 5
+syscall
+
+move $t0, $v0 #this is the number that we will times and replace with the number that we just multiplied within the same temp register
+
+move $t7, $v0 #move inputted for use later when outputting the result
+
+#start timer after input
+li $v0,30
+syscall
+move $t5, $a0
+syscall
+
+#setup
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+li $v0, 4
+la $a0, txtsetup
+syscall
+
+loop1:
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+addi $t1, $t1, -1 #minus one for everytime the loop is run
+bgez $t1, loop1  #loop if the condition is met
+#needs to multi after otherwise the number just increases everytime the loop is called again
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+loop2:
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+addi $t1, $t1, -1 #minus one for everytime the loop is run
+bgez $t1, loop2  #loop if the condition is met
+#needs to multi after otherwise the number just increases everytime the loop is called again
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+loop3:
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+addi $t1, $t1, -1 #minus one for everytime the loop is run
+bgez $t1, loop3  #loop if the condition is met
+#needs to multi after otherwise the number just increases everytime the loop is called again
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+loop4:
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+addi $t1, $t1, -1 #minus one for everytime the loop is run
+bgez $t1, loop4  #loop if the condition is met
+#needs to multi after otherwise the number just increases everytime the loop is called again
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+loop5:
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+addi $t1, $t1, -1 #minus one for everytime the loop is run
+bgez $t1, loop5  #loop if the condition is met
+#needs to multi after otherwise the number just increases everytime the loop is called again
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+loop6:
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+addi $t1, $t1, -1 #minus one for everytime the loop is run
+bgez $t1, loop6  #loop if the condition is met
+#needs to multi after otherwise the number just increases everytime the loop is called again
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+loop7:
+addi $t6, $zero, 4 # multiplied number bigger number here results in a slower time
+addi $t1, $t1, -1 #minus one for everytime the loop is run
+bgez $t1, loop7  #loop if the condition is met
+#needs to multi after otherwise the number just increases everytime the loop is called again
+mult $t0,$t6
+mflo $t0
+mflo $t1
+
+nSquareInput:
+mult $t7,$t7
+mflo $t7
+j end
+
+end:
+
+#stop timer here as calculations are done running!
+li $v0,30
+syscall
+move $t6, $a0
+syscall
+
+sub $t3, $t6, $t5
+
+addi $v0, $zero, 4  # print_string syscall
+la $a0, message   # load address string that will print the number to a new line
+syscall #let system call the specified value in $v0
+
+li $v0, 1
+#mflo $t7
+move $a0, $t7
+syscall
+## end here##
+
+#new line
+li $v0,4  # print_string syscall
+la $a0, time  # load address string that will print the number to a new line
+syscall #let system call the specified value in $v0
+
+li $v0, 1
+move $a0, $t3
+syscall
+
+li $v0, 4  # print_string syscall
+la $a0, milliseconds   # load address string that will print the number to a new line
+syscall #let system call the specified value in $v0
+
+addi $t7, $zero, 1000 #divide by 1000 to convert milliseconds -> seconds
+div $t2, $t3, $t7
+
+#new line
+li $v0,4  # print_string syscall
+la $a0, time  # load address string that will print the number to a new line
+syscall #let system call the specified value in $v0
+
+li $v0, 1
+move $a0, $t2
+syscall
+
+li $v0, 4  # print_string syscall
+la $a0, seconds   # load address string that will print the number to a new line
+syscall #let system call the specified value in $v0
+
+#print loops done
+li $v0, 4  # print_string syscall
+la $a0, loops   # load address string that will print the number to a new line
+syscall #let system call the specified value in $v0
+
+#print loops int
+li $v0, 1
+move $a0, $t0
+syscall 
+
+
+#end the program by loading the exit service code
+li $v0, 10
+syscall #let system call the specified value in $v0

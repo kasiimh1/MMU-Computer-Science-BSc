@@ -1,0 +1,124 @@
+/*
+    videoScript.js created by Kasim Hussain
+    Last Updated 02:21PM
+    29/11/17
+    ;)
+        */
+
+* {
+  margin: 0 auto;
+  padding: 0px;
+}
+
+video {
+  width: 100%;
+  height: 50em;
+  display: block;
+  margin-top: 3.5em;
+}
+
+#videoControls {
+  position: absolute;
+  border-radius: 5px;
+  width: 74%;
+  margin-left: 13%;
+  background: #161618;
+  text-align: center;
+  margin-top: 1.5em;
+  height: 3.2em;
+}
+
+#fullScreenControls {
+  position: absolute;
+  width: 100%;
+  background: #161618;
+  height: 3.2em;
+  margin-top: -4.5em;
+}
+
+#current, #duration {
+  float: left;
+  margin-top: 10px;
+  width: 15%;
+  border-radius: 5px;
+  margin-left: 20px;
+}
+
+#videoFullscreen {
+  float: right;
+  font-family: FontAwesome;
+  margin-top: 10px;
+  font-size: 30px;
+  height: 30px;
+  margin-right: 2em;
+  border: none;
+  color: white;
+  background: rgba(255, 255, 255, 0);
+}
+
+#playPause, #volumeMute, #restartVideo, #loopVideo, #stopVideo, #fastForwardVideo {
+  float: left;
+  font-family: FontAwesome;
+  margin-top: 10px;
+  font-size: 20px;
+  width: 30px;
+  padding: 0px 20px;
+  height: 30px;
+  border-radius: 2px;
+  margin-left: 20px;
+  border: none;
+  color: white;
+  background: rgba(255, 255, 255, 0);
+}
+
+#selectedPlaybackValue {
+  float: left;
+  margin-top: 10px;
+  font-size: 20px;
+  width: 120px;
+  height: 30px;
+  border-radius: 2px;
+  margin-left: 20px;
+}
+
+#volumeSlider {
+  float: left;
+  margin-top: 10px;
+  font-size: 20px;
+  width: 100px;
+  height: 30px;
+  margin-left: 20px;
+}
+
+#seekBar {
+  float: left;
+  width: 320px;
+}
+
+#current {
+  float: left;
+  font-size: 20px;
+  width: 450px;
+  padding-top: 6px;
+  border-radius: 5px;
+  height: 30px;
+  color: white;
+}
+
+body {
+  background-color: black;
+}
+
+select {
+  font-family: FontAwesome;
+  color: black;
+  background: rgba(255, 255, 255, 0.9);
+  float: left;
+  font-size: 15px;
+  margin-left: 20px;
+  margin-top: 15px;
+}
+
+video::-webkit-media-controls-panel {
+  background-color: #161618;
+}
